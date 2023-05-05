@@ -7,51 +7,62 @@ fn main() {
 }
 
 fn App(cx: Scope) -> Element {
-    let start_date = use_state(cx, || 0);
-    let end_date = use_state(cx, || 0);
+    let start_date: &UseState<String> = use_state(cx, String::new);
+    let end_date: &UseState<String> = use_state(cx, String::new);
+
+    let hide_end = use_state(cx, || true);
 
     cx.render(rsx! {
-        div {
-            // width: "50%",
-            // height: "20px",
-            // background_color: "red",
-            // justify_content: "center",
-            // align_items: "center",
-            input {
-                value: "{start_date}",
+        form {
+            select {
                 onchange: move |evt| {
-                    match evt.value.clone().parse::<i32>() {
-                        Ok(number) => {
-                            println!("F={}", number);
-                        }
-                        Err(_) => {
-                            println!("Invalid input. Please enter an integer.");
-                        }
-                    }
+                //   println!("select evt: {:?}", evt.data.value);
+                  if evt.data.value != "1" {
+                    println!("Return Trip");
+                    hide_end.set(false);
+                  } else {
+                    println!("One-Way Trip");
+                    hide_end.set(true);
+                  }
+                },
+                id: "",
+                name: "trip_type",
+                option {
+                    value: "1", "One-Way Flight"
+                }
+                option {
+                    value: "2", "Round Trip"
+                }
+                option {
+                    // selected: true,
+                    value: "3", "Multi-City"
                 }
             }
-        }
-        div {
-            input {
-                value: "{end_date}",
-                onchange: move |evt| {
-                    match evt.value.clone().parse::<i32>() {
-                        Ok(number) => {
-                            println!("C={}", number);
-                        }
-                        Err(_) => {
-                            println!("Invalid input. Please enter an integer.");
-                        }
-                    }
+            div {
+                input {
+                    value: "{start_date}",
+                    r#type: "date",
+                    placeholder: "Start",
+                    oninput: move |e| start_date.set(e.value.clone())
                 }
             }
-        }
-        div {
-            width: "50%",
-            height: "20px",
-            button {
-                "Book",
 
+            div {
+                input {
+                    value: "{end_date}",
+                    r#type: "date",
+                    placeholder: "Return",
+                    disabled: "{hide_end}",
+                    oninput: move |e| end_date.set(e.value.clone())
+                }
+            }
+            div {
+                width: "100%",
+                height: "30px",
+                button {
+                    onclick: move |event| println!("Booked! Event: {event:?}"),
+                    "Book",
+                }
             }
         }
     })
